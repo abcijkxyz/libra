@@ -135,7 +135,7 @@ impl Experiment for CompatibilityTest {
             .await
             .map_err(|e| anyhow::format_err!("Failed to generate traffic: {}", e))?;
 
-        info!("1. Changing the images for the first instance to validate storage");
+        context.report.report_text("1. Changing the images for the first instance to validate storage".to_string());
         let first_node = vec![self.first_node.clone()];
         update_batch_instance(context, &first_node, self.updated_image_tag.clone()).await?;
         context
@@ -147,11 +147,7 @@ impl Experiment for CompatibilityTest {
             .await
             .map_err(|e| anyhow::format_err!("Storage backwards compat broken: {}", e))?;
 
-        context
-            .report
-            .report_metric(self.to_string(), "storage_compat", 1.0);
-
-        info!("2. Changing images for the first batch to test consensus");
+        context.report.report_text("2. Changing images for the first batch to test consensus".to_string());
         update_batch_instance(context, &self.first_batch, self.updated_image_tag.clone()).await?;
         context
             .tx_emitter
@@ -159,11 +155,7 @@ impl Experiment for CompatibilityTest {
             .await
             .map_err(|e| anyhow::format_err!("Consensus backwards compat broken: {}", e))?;
 
-        context
-            .report
-            .report_metric(self.to_string(), "consensus_compat", 1.0);
-
-        info!("3. Changing images for the rest of the nodes");
+        context.report.report_text("3. Changing images for the rest of the nodes".to_string());
         update_batch_instance(context, &self.second_batch, self.updated_image_tag.clone()).await?;
         context
             .tx_emitter
@@ -173,7 +165,7 @@ impl Experiment for CompatibilityTest {
                 anyhow::format_err!("Failed to upgrade rest of validator images: {}", e)
             })?;
 
-        info!("4. Changing images for full nodes");
+        context.report.report_text("4. Changing images for full nodes".to_string());
         update_batch_instance(context, &self.full_nodes, self.updated_image_tag.clone()).await?;
         context
             .tx_emitter
